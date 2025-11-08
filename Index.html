@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্মার্ট ফাইল এডিটর</title>
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="একটি আধুনিক এবং শক্তিশালী ফাইল এডিটর">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon {
+            font-size: 32px;
+        }
+
+        .app-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .app-tabs {
+            display: flex;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            background: white;
+        }
+
+        .app-content {
+            padding: 24px;
+        }
+
+        .file-info-card {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .file-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .meta-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .editor-container {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #file-content {
+            width: 100%;
+            min-height: 400px;
+            border: none;
+            padding: 20px;
+            font-size: 16px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            line-height: 1.5;
+            resize: vertical;
+            background: var(--card);
+            color: var(--text);
+        }
+
+        #file-content:focus {
+            outline: none;
+        }
+
+        .editor-status {
+            background: var(--bg);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .recent-files {
+            margin-top: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .file-card {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-details {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            background: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+
+            .app-stats {
+                justify-content: center;
+            }
+
+            .toolbar {
+                justify-content: center;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 120px;
+                justify-content: center;
+            }
+
+            .editor-status {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+        }
+
+        .dark-mode {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="app-title">
+                <span class="app-icon">📝</span>
+                স্মার্ট ফাইল এডিটর
+            </div>
+            <div class="app-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="char-count">0</div>
+                    <div>অক্ষর</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="word-count">0</div>
+                    <div>শব্দ</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="line-count">0</div>
+                    <div>লাইন</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="app-tabs">
+            <div class="tab active" data-tab="editor">এডিটর</div>
+            <div class="tab" data-tab="recent">সাম্প্রতিক ফাইল</div>
+            <div class="tab" data-tab="settings">সেটিংস</div>
+        </div>
+
+        <div class="app-content">
+            <div class="file-info-card">
+                <div class="file-info">
+                    <strong>বর্তমান ফাইল:</strong> <span id="current-file-name">কোনো ফাইল ওপেন নেই</span>
+                </div>
+                <div class="file-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">ফাইলের ধরন</span>
+                        <span class="meta-value" id="file-type">-</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">সাইজ</span>
+                        <span class="meta-value" id="file-size">-</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">সর্বশেষ পরিবর্তন</span>
+                        <span class="meta-value" id="file-modified">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <button class="btn btn-primary" id="new-btn">
+                    <span>🆕</span> নতুন ফাইল
+                </button>
+                <button class="btn btn-primary" id="open-btn">
+                    <span>📂</span> ফাইল ওপেন
+                </button>
+                <button class="btn btn-success" id="save-btn" disabled>
+                    <span>💾</span> সেভ করুন
+                </button>
+                <button class="btn btn-warning" id="save-as-btn">
+                    <span>📋</span> নতুন নামে সেভ
+                </button>
+                <button class="btn btn-danger" id="clear-btn">
+                    <span>🗑️</span> ক্লিয়ার
+                </button>
+            </div>
+
+            <div class="editor-container">
+                <textarea 
+                    id="file-content" 
+                    placeholder="এখানে আপনার কন্টেন্ট লিখুন... অথবা একটি ফাইল ওপেন করুন।"
+                    spellcheck="true"
+                ></textarea>
+                <div class="editor-status">
+                    <div class="status-item">
+                        <span>লাইন:</span>
+                        <span id="current-line">1</span>
+                        <span>কলাম:</span>
+                        <span id="current-column">1</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="badge badge-warning" id="unsaved-badge" style="display: none;">
+                            * সেভ করা হয়নি
+                        </div>
+                        <div class="badge badge-success" id="saved-badge">
+                            ✓ সেভ করা হয়েছে
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-files">
+                <h3 class="section-title">সাম্প্রতিক ফাইলসমূহ</h3>
+                <div class="files-grid" id="recent-files-grid">
+                    <!-- Recent files will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // App State
+        let currentFileHandle = null;
+        let hasUnsavedChanges = false;
+        let recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+
+        // DOM Elements
+        const elements = {
+            fileContent: document.getElementById('file-content'),
+            currentFileName: document.getElementById('current-file-name'),
+            charCount: document.getElementById('char-count'),
+            wordCount: document.getElementById('word-count'),
+            lineCount: document.getElementById('line-count'),
+            currentLine: document.getElementById('current-line'),
+            currentColumn: document.getElementById('current-column'),
+            fileType: document.getElementById('file-type'),
+            fileSize: document.getElementById('file-size'),
+            fileModified: document.getElementById('file-modified'),
+            saveBtn: document.getElementById('save-btn'),
+            unsavedBadge: document.getElementById('unsaved-badge'),
+            savedBadge: document.getElementById('saved-badge'),
+            recentFilesGrid: document.getElementById('recent-files-grid'),
+            toast: document.getElementById('toast')
+        };
+
+        // Initialize App
+        function initApp() {
+            loadRecentFiles();
+            setupEventListeners();
+            updateStats();
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Button events
+            document.getElementById('new-btn').addEventListener('click', newFile);
+            document.getElementById('open-btn').addEventListener('click', openFile);
+            document.getElementById('save-btn').addEventListener('click', saveFile);
+            document.getElementById('save-as-btn').addEventListener('click', saveAsFile);
+            document.getElementById('clear-btn').addEventListener('click', clearEditor);
+
+            // Editor events
+            elements.fileContent.addEventListener('input', handleContentChange);
+            elements.fileContent.addEventListener('keyup', updateCursorPosition);
+            elements.fileContent.addEventListener('click', updateCursorPosition);
+
+            // Tab events
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', switchTab);
+            });
+        }
+
+        // File Operations
+        async function newFile() {
+            if (hasUnsavedChanges && !confirm('সেভ না করা পরিবর্তন হারিয়ে যাবে। আপনি কি নিশ্চিত?')) {
+                return;
+            }
+            
+            elements.fileContent.value = '';
+            currentFileHandle = null;
+            updateFileInfo('নতুন ফাইল', 'Text File', '0 B', 'এখনই');
+            hasUnsavedChanges = false;
+            updateUI();
+            updateStats();
+            showToast('নতুন ফাইল তৈরি করা হয়েছে');
+        }
+
+        async function openFile() {
+            try {
+                if (!('showOpenFilePicker' in window)) {
+                    showToast('আপনার ব্রাউজার ফাইল সিস্টেম API সাপোর্ট করে না');
+                    return;
+                }
+
+                const [fileHandle] = await window.showOpenFilePicker({
+                    types: [
+                        {
+                            description: 'Text Files',
+                            accept: {'text/plain': ['.txt', '.text']},
+                        },
+                        {
+                            description: 'All Files',
+                            accept: {'*/*': ['.*']}
+                        }
+                    ],
+                    multiple: false,
+                });
+
+                const file = await fileHandle.getFile();
+                const content = await file.text();
+                
+                elements.fileContent.value = content;
+                currentFileHandle = fileHandle;
+                
+                // Update file info
+                updateFileInfo(
+                    file.name,
+                    file.type || 'Unknown',
+                    formatFileSize(file.size),
+                    new Date(file.lastModified).toLocaleString('bn-BD')
+                );
+
+                // Add to recent files
+                addToRecentFiles({
+                    name: file.name,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                    handle: fileHandle
+                });
+
+                hasUnsavedChanges = false;
+                updateUI();
+                updateStats();
+                showToast(`ফাইল ওপেন করা হয়েছে: ${file.name}`);
+
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    showToast('ফাইল ওপেন করতে সমস্যা হয়েছে');
+                }
+            }
+        }
+
+        async function saveFile() {
+            if (!currentFileHandle) {
+                await saveAsFile();
+                return;
+            }
+
+            try {
+                const writable = await currentFileHandle.createWritable();
+                await writable.write(elements.fileContent.value);
+                await writable.close();
+
+                hasUnsavedChanges = false;
+                updateUI();
+                showToast('ফাইল সফলভাবে সেভ করা হয়েছে');
+
+            } catch (error) {
+                showToast('ফাইল সেভ করতে সমস্যা হয়েছে');
+            }
+        }
+
+        async function saveAsFile() {
+            try {
+                currentFileHandle = await window.showSaveFilePicker({
+                    types: [
+                        {
+                            description: 'Text Files',
+                            accept: {'text/plain': ['.txt']},
+                        },
+                    ],
+                });
+
+                await saveFile();
+                
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    showToast('ফাইল সেভ করতে সমস্যা হয়েছে');
+                }
+            }
+        }
+
+        function clearEditor() {
+            if (elements.fileContent.value.trim() && !confirm('সমস্ত কন্টেন্ট মুছে ফেলা হবে। আপনি কি নিশ্চিত?')) {
+                return;
+            }
+            elements.fileContent.value = '';
+            updateStats();
+            showToast('এডিটর ক্লিয়ার করা হয়েছে');
+        }
+
+        // Utility Functions
+        function handleContentChange() {
+            hasUnsavedChanges = true;
+            updateUI();
+            updateStats();
+        }
+
+        function updateUI() {
+            elements.saveBtn.disabled = !hasUnsavedChanges;
+            elements.unsavedBadge.style.display = hasUnsavedChanges ? 'block' : 'none';
+            elements.savedBadge.style.display = hasUnsavedChanges ? 'none' : 'block';
+        }
+
+        function updateStats() {
+            const content = elements.fileContent.value;
+            const charCount = content.length;
+            const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+            const lineCount = content ? content.split('\n').length : 1;
+
+            elements.charCount.textContent = charCount.toLocaleString('bn-BD');
+            elements.wordCount.textContent = wordCount.toLocaleString('bn-BD');
+            elements.lineCount.textContent = lineCount.toLocaleString('bn-BD');
+        }
+
+        function updateCursorPosition() {
+            const textarea = elements.fileContent;
+            const text = textarea.value.substr(0, textarea.selectionStart);
+            const lines = text.split('\n');
+            const line = lines.length;
+            const column = lines[lines.length - 1].length + 1;
+
+            elements.currentLine.textContent = line;
+            elements.currentColumn.textContent = column;
+        }
+
+        function updateFileInfo(name, type, size, modified) {
+            elements.currentFileName.textContent = name;
+            elements.fileType.textContent = type;
+            elements.fileSize.textContent = size;
+            elements.fileModified.textContent = modified;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Recent Files Management
+        function addToRecentFiles(fileInfo) {
+            recentFiles = recentFiles.filter(f => f.name !== fileInfo.name);
+            recentFiles.unshift(fileInfo);
+            recentFiles = recentFiles.slice(0, 6); // Keep only 6 recent files
+            localStorage.setItem('recentFiles', JSON.stringify(recentFiles));
+            loadRecentFiles();
+        }
+
+        function loadRecentFiles() {
+            elements.recentFilesGrid.innerHTML = '';
+            
+            recentFiles.forEach(file => {
+                const fileCard = document.createElement('div');
+                fileCard.className = 'file-card';
+                fileCard.innerHTML = `
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-details">
+                        <div>সাইজ: ${formatFileSize(file.size)}</div>
+                        <div>সময়: ${new Date(file.lastModified).toLocaleDateString('bn-BD')}</div>
+                    </div>
+                `;
+                fileCard.addEventListener('click', () => openRecentFile(file));
+                elements.recentFilesGrid.appendChild(fileCard);
+            });
+        }
+
+        async function openRecentFile(file) {
+            try {
+                const fileObj = await file.handle.getFile();
+                const content = await fileObj.text();
+                
+                elements.fileContent.value = content;
+                currentFileHandle = file.handle;
+                updateFileInfo(
+                    file.name,
+                    'Text File',
+                    formatFileSize(file.size),
+                    new Date(file.lastModified).toLocaleString('bn-BD')
+                );
+                
+                hasUnsavedChanges = false;
+                updateUI();
+                updateStats();
+                showToast(`ফাইল ওপেন করা হয়েছে: ${file.name}`);
+
+            } catch (error) {
+                showToast('ফাইল ওপেন করতে সমস্যা হয়েছে');
+                // Remove from recent files if can't open
+                recentFiles = recentFiles.filter(f => f.name !== file.name);
+                localStorage.setItem('recentFiles', JSON.stringify(recentFiles));
+                loadRecentFiles();
+            }
+        }
+
+        // Tab Management
+        function switchTab(event) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            // Implement tab content switching here
+        }
+
+        // Toast Notifications
+        function showToast(message, duration = 3000) {
+            elements.toast.textContent = message;
+            elements.toast.classList.add('show');
+            
+            setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, duration);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        // Before unload warning
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>
